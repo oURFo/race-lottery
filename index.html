@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1b1f3b">
+<title>賽跑抽獎系統</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<button id="muteBtn" class="icon-btn" title="音效">🔊</button>
+
+<!-- 設定總人數 -->
+<section id="screen-setup" class="screen">
+  <div class="card">
+    <h1>🏁 賽跑抽獎</h1>
+    <p class="sub">先設定總人數（設定後不可更改）</p>
+    <input id="totalInput" type="number" min="2" max="50" value="25" inputmode="numeric">
+    <button id="setupBtn" class="btn primary">確認鎖定人數</button>
+  </div>
+</section>
+
+<!-- 登錄 -->
+<section id="screen-register" class="screen hidden">
+  <div class="card">
+    <h2>玩家登錄 <span id="regProgress" class="badge"></span></h2>
+    <div class="avatar-pick">
+      <img id="avatarPreview" alt="頭像">
+      <label class="btn">📷 拍照 / 上傳
+        <input id="photoInput" type="file" accept="image/*" capture="user" hidden>
+      </label>
+    </div>
+    <input id="nameInput" type="text" maxlength="12" placeholder="輸入姓名">
+    <div id="regError" class="error"></div>
+    <button id="submitBtn" class="btn primary">送出領取號碼</button>
+    <button id="fillTestBtn" class="btn ghost small">⚡ 一鍵填入測試玩家</button>
+  </div>
+  <div class="card">
+    <h3>已登錄玩家</h3>
+    <div id="playerList" class="player-grid"></div>
+    <button id="toRaceBtn" class="btn primary hidden">🏃 進入賽道開始抽獎！</button>
+  </div>
+  <button id="resetBtn1" class="btn ghost small reset">重新開始</button>
+</section>
+
+<!-- 賽道 -->
+<section id="screen-race" class="screen hidden race">
+  <div class="cam-wrap">
+    <canvas id="camCanvas"></canvas>
+    <div id="leaderBanner" class="leader-banner"></div>
+  </div>
+  <div class="top-wrap">
+    <canvas id="topCanvas"></canvas>
+    <div id="raceInfo" class="race-info"></div>
+  </div>
+  <div id="countdown" class="countdown hidden"></div>
+  <button id="startRaceBtn" class="btn primary start-race">開始比賽</button>
+</section>
+
+<!-- 結果 -->
+<section id="screen-results" class="screen hidden">
+  <div class="card">
+    <h1>🏆 最終得獎結果</h1>
+    <div id="resultList" class="result-list"></div>
+    <button id="copyBtn" class="btn">📋 複製結果文字</button>
+    <button id="resetBtn2" class="btn ghost">重新開始新局</button>
+  </div>
+</section>
+
+<!-- 配號彈窗 -->
+<div id="numberModal" class="modal hidden">
+  <div class="modal-box">
+    <img id="numAvatar" class="big-avatar" alt="">
+    <div id="numName" class="m-name"></div>
+    <p>您配對到的專屬號碼是</p>
+    <div id="numValue" class="big-number"></div>
+    <p class="warn">請記住您的號碼！點擊後號碼將隱藏，交給下一位</p>
+    <button id="numOkBtn" class="btn primary">我記住了，換下一位</button>
+  </div>
+</div>
+
+<!-- 轉盤彈窗 -->
+<div id="wheelModal" class="modal hidden">
+  <div class="modal-box">
+    <div class="m-title">🎉 衝線！</div>
+    <img id="wheelAvatar" class="big-avatar" alt="">
+    <div id="wheelName" class="m-name"></div>
+    <div class="wheel-wrap">
+      <div class="pointer">▼</div>
+      <canvas id="wheelCanvas" width="600" height="600"></canvas>
+      <button id="spinBtn" class="spin-btn">SPIN</button>
+    </div>
+    <div id="wheelResult" class="wheel-result"></div>
+    <button id="continueBtn" class="btn primary hidden">繼續比賽</button>
+  </div>
+</div>
+
+<div id="confetti"></div>
+<script src="app.js"></script>
+</body>
+</html>
