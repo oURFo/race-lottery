@@ -156,10 +156,15 @@ const camCv = $('camCanvas'), topCv = $('topCanvas');
 
 function initRace() {
   state.finishOrder = state.finishOrder.filter(id => state.awards[id] !== undefined); save();
+  // 每位跑者隱藏的「實力係數」平均分布在 0.5~1.15，讓抵達時間拉開
+  const n = state.players.length;
+  const ranks = shuffle(Array.from({ length: n }, (_, i) => i));
   runners = state.players.map((p, i) => {
     const done = state.finishOrder.includes(p.id);
-    return { p, lane: i, pos: done ? TRACK + 20 : 0, speed: 0, target: 0, fx: '', fxT: 0, done, bob: Math.random() * 6 };
+    const ability = 1.15 - (n > 1 ? ranks[i] / (n - 1) : 0) * 0.65;
+    return { p, lane: i, pos: done ? TRACK + 20 : 0, speed: 0, target: 0, fx: '', fxT: 0, done, ability, bob: Math.random() * 6 };
   });
+  camFocus = null;
   finishQueue = []; paused = true; raceRunning = false;
   $('startRaceBtn').classList.remove('hidden');
   $('startRaceBtn').textContent = state.finishOrder.length ? '繼續比賽' : '開始比賽';
@@ -189,19 +194,19 @@ function leader() {
   const a = active(); if (!a.length) return runners[0];
   return a.reduce((m, r) => r.pos > m.pos ? r : m, a[0]);
 }
-// 每秒重新決定速度：基礎隨機 + 暴衝/踉蹌事件 + 落後者破風追趕（橡皮筋）
+// 每秒重新決定速度：基礎隨機 × 實力係數 + 暴衝/踉蹌事件 + 極大落差時微弱追趕
+let camFocus = null;
 function rerollSpeeds() {
   const a = active(); if (!a.length) return;
   const lead = leader().pos;
   a.forEach(r => {
-    let s = rand(30, 50);
+    let s = rand(17, 27) * r.ability;
     const gap = lead - r.pos;
-    r.fx = ''; 
+    r.fx = '';
     const roll = Math.random();
-    if (roll < 0.10) { s *= rand(1.4, 1.7); r.fx = '🔥'; }
-    else if (roll < 0.18) { s *= rand(0.35, 0.6); r.fx = '🍌'; }
-    if (gap > 25) { s += Math.min(gap * 0.12, 14); if (!r.fx && gap > 60) r.fx = '⚡'; }
-    if (r.pos === lead && r.pos > TRACK * 0.6) s *= 0.93; // 領先者壓力
+    if (roll < 0.08) { s *= rand(1.4, 1.7); r.fx = '🔥'; }
+    else if (roll < 0.15) { s *= rand(0.35, 0.6); r.fx = '🍌'; }
+    if (gap > 150) { s += Math.min((gap - 150) * 0.02, 3); if (!r.fx) r.fx = '⚡'; }
     r.target = s;
   });
 }
@@ -314,7 +319,7 @@ function drawTop(time) {
 function drawCam(time) {
   const c = camCv, ctx = c.getContext('2d'), W = c.width, H = c.height;
   const N = runners.length, LW = 1.6, half = N * LW / 2;
-  const lead = leader();
+  const lead = camFocus || leader();
   const laneX = (l) => (l - (N - 1) / 2) * LW;
   const tz = lead.pos - 7, tx = laneX(lead.lane);
   camZ += (tz - camZ) * 0.15; camX += (tx - camX) * 0.08;
@@ -425,6 +430,7 @@ function drawWheel() {
   ctx.restore();
 }
 function openWheel(player) {
+  camFocus = runners.find(r => r.p.id === player.id) || null;
   wheelPlayer = player; wheelNums = remainingNumbers(); wheelRot = 0; spinning = false;
   $('wheelAvatar').src = player.avatar; $('wheelName').textContent = player.name;
   $('wheelResult').textContent = '按下 SPIN 抽獎！';
@@ -461,6 +467,7 @@ function finishSpin(win) {
 }
 $('continueBtn').onclick = () => {
   $('wheelModal').classList.add('hidden');
+  camFocus = null;
   nextFinisher();
 };
 
