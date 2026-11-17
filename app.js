@@ -207,7 +207,7 @@ let camFocus = null, speedMul = 1;
 $('speedBtn').onclick = () => {
   speedMul = speedMul === 1 ? 2 : 1;
   $('speedBtn').classList.toggle('on', speedMul === 2);
-  $('speedBtn').textContent = speedMul === 2 ? 'X1' : 'X2';
+  $('speedBtn').textContent = speedMul === 2 ? '⚡ X2 開啟中' : '⏩ X2 加速';
 };
 function rerollSpeeds() {
   const a = active(); if (!a.length) return;
@@ -226,7 +226,7 @@ function rerollSpeeds() {
 
 function loop(t) {
   const dt = Math.min((t - lastT) / 1000, 0.05); lastT = t;
-  if (raceRunning && !paused) { update(dt * speedMul); if (speedMul > 1 && !paused) update(0); }
+  if (raceRunning && !paused) update(dt * speedMul);
   draw(t / 1000);
   rafId = requestAnimationFrame(loop);
 }
