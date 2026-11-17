@@ -91,7 +91,7 @@ function renderRegister() {
   const done = state.players.length, full = done >= state.total;
   $('regProgress').textContent = `${done} / ${state.total}`;
   $('playerList').innerHTML = state.players.map(p =>
-    `<div class="p"><img src="${p.avatar}">${escapeHtml(p.name)}</div>`).join('');
+    `<div class="p"><button class="del" data-id="${p.id}" title="刪除">✕</button><img src="${p.avatar}">${escapeHtml(p.name)}</div>`).join('');
   $('toRaceBtn').classList.toggle('hidden', !full);
   ['nameInput', 'submitBtn', 'fillTestBtn', 'photoInput'].forEach(id => $(id).disabled = full);
   $('submitBtn').textContent = full ? '全員登錄完畢 ✅' : '送出領取號碼';
@@ -99,6 +99,14 @@ function renderRegister() {
 }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
+$('playerList').onclick = (e) => {
+  const id = e.target.dataset && e.target.dataset.id; if (!id) return;
+  const p = state.players.find(x => x.id === id); if (!p) return;
+  if (!confirm(`確定刪除「${p.name}」？其號碼將放回號碼池，可重新登錄。`)) return;
+  state.players = state.players.filter(x => x.id !== id);
+  state.pool.push(p.num); shuffle(state.pool);
+  delete imgCache[id]; save(); renderRegister();
+};
 $('nameInput').oninput = () => { if (!pendingAvatar) $('avatarPreview').src = defaultAvatar($('nameInput').value || '?', state.players.length); };
 $('photoInput').onchange = async (e) => {
   const f = e.target.files[0]; if (!f) return;
@@ -195,7 +203,12 @@ function leader() {
   return a.reduce((m, r) => r.pos > m.pos ? r : m, a[0]);
 }
 // 每秒重新決定速度：基礎隨機 × 實力係數 + 暴衝/踉蹌事件 + 極大落差時微弱追趕
-let camFocus = null;
+let camFocus = null, speedMul = 1;
+$('speedBtn').onclick = () => {
+  speedMul = speedMul === 1 ? 2 : 1;
+  $('speedBtn').classList.toggle('on', speedMul === 2);
+  $('speedBtn').textContent = speedMul === 2 ? 'X1' : 'X2';
+};
 function rerollSpeeds() {
   const a = active(); if (!a.length) return;
   const lead = leader().pos;
@@ -213,7 +226,7 @@ function rerollSpeeds() {
 
 function loop(t) {
   const dt = Math.min((t - lastT) / 1000, 0.05); lastT = t;
-  if (raceRunning && !paused) update(dt);
+  if (raceRunning && !paused) { update(dt * speedMul); if (speedMul > 1 && !paused) update(0); }
   draw(t / 1000);
   rafId = requestAnimationFrame(loop);
 }

@@ -93,3 +93,8 @@ input[type=number], input[type=text] {
 #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 60; overflow: hidden; }
 .cf { position: absolute; top: -20px; width: 10px; height: 14px; animation: fall linear forwards; }
 @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+
+.speed-btn { position: fixed; right: 8px; bottom: 12px; z-index: 25; padding: 10px 16px; font-size: 18px; font-weight: 900; border-radius: 999px; border: 2px solid #fff; background: rgba(0,0,0,.55); color: #fff; }
+.speed-btn.on { background: linear-gradient(135deg, #ff7a18, #ff2f6d); }
+.player-grid .p { position: relative; }
+.player-grid .del { position: absolute; top: -4px; right: 2px; width: 22px; height: 22px; border-radius: 50%; border: none; background: #ff2f6d; color: #fff; font-weight: 900; font-size: 13px; line-height: 22px; cursor: pointer; }
